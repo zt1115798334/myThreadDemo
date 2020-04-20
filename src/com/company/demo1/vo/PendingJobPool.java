@@ -7,8 +7,7 @@ import java.util.concurrent.*;
 public class PendingJobPool {
 
     //保守估计
-    private static final int THREAD_COUNTS =
-            Runtime.getRuntime().availableProcessors();
+    private static final int THREAD_COUNTS = Runtime.getRuntime().availableProcessors();
     //任务队列
     private static final BlockingQueue<Runnable> taskQueue
             = new ArrayBlockingQueue<>(5000);
@@ -20,8 +19,7 @@ public class PendingJobPool {
     private static final ConcurrentHashMap<String, JobInfo<?>> jobInfoMap
             = new ConcurrentHashMap<>();
 
-    private static final CheckJobProcesses checkJob
-            = CheckJobProcesses.getInstance();
+    private static final CheckJobProcesses checkJob = CheckJobProcesses.getInstance();
 
     public static Map<String, JobInfo<?>> getMap() {
         return jobInfoMap;
@@ -68,9 +66,9 @@ public class PendingJobPool {
                 }
                 if (result.getResultType() == null) {
                     if (result.getReason() == null) {
-                        result = new TaskResult<R>(TaskResultType.EXCEPTION, r, "reason is null");
+                        result = new TaskResult<>(TaskResultType.EXCEPTION, r, "reason is null");
                     } else {
-                        result = new TaskResult<R>(TaskResultType.EXCEPTION, r,
+                        result = new TaskResult<>(TaskResultType.EXCEPTION, r,
                                 "result is null,but reason:" + result.getReason());
                     }
                 }
@@ -79,6 +77,7 @@ public class PendingJobPool {
                 result = new TaskResult<>(TaskResultType.EXCEPTION, r,
                         e.getMessage());
             } finally {
+                assert result != null;
                 jobInfo.addTaskResult(result, checkJob);
             }
         }
@@ -97,7 +96,7 @@ public class PendingJobPool {
     //调用者提交工作中的任务
     public <T, R> void putTask(String jobName, T t) {
         JobInfo<R> jobInfo = getJob(jobName);
-        PendingTask<T, R> task = new PendingTask<T, R>(jobInfo, t);
+        PendingTask<T, R> task = new PendingTask<>(jobInfo, t);
         taskExecutor.execute(task);
     }
 

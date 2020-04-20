@@ -2,9 +2,11 @@ package com.company.demo1.vo;
 
 import java.util.concurrent.DelayQueue;
 
+/**
+ * 用来查询过期队列
+ */
 public class CheckJobProcesses {
-    private static final DelayQueue<ItemVo<String>> queue
-            = new DelayQueue<>();//存放已完成任务等待过期的队列
+    private static final DelayQueue<ItemVo<String>> queue = new DelayQueue<>();//存放已完成任务等待过期的队列
 
     //单例模式------
     private CheckJobProcesses() {
@@ -24,23 +26,23 @@ public class CheckJobProcesses {
 
         @Override
         public void run() {
-            while (true) {
-                try {
+            try {
+                for(;;){
                     //拿到已经过期的任务
                     ItemVo<String> item = queue.take();
-                    String jobName = (String) item.getDate();
+                    String jobName = item.getDate();
                     PendingJobPool.getMap().remove(jobName);
                     System.out.println(jobName + " is out of date,remove from map!");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
 
     /*任务完成后，放入队列，经过expireTime时间后，从整个框架中移除*/
     public void putJob(String jobName, long expireTime) {
-        ItemVo<String> item = new ItemVo<String>(expireTime, jobName);
+        ItemVo<String> item = new ItemVo<>(expireTime, jobName);
         queue.offer(item);
         System.out.println("Job[" + jobName + "已经放入了过期检查缓存，过期时长：" + expireTime);
     }
